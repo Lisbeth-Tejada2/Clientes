@@ -1,0 +1,176 @@
+﻿@page "/R_Clientes"
+@page "/R_Clientes/{ClienteId:int}"
+
+@inject NotificationService notificacion
+@inject ClientesBLL ClientesBll
+
+<EditForm Model="Cliente" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="rz-border-radius-4 shadow d-block p-2 border border-4">
+            <div class="rz-border-radius-4 shadow card-header text-center">
+                <h3>Registro de Clientes</h3>
+            </div>
+
+            <div class="container overflow-hidden">
+                <form class="row gy-3">
+                   
+                    <div class="form-row align-items-center">
+                        <div class="col-ms">
+                            <label>ClienteId</label>
+                            <div class="input-group mb-3">
+                                <InputNumber @bind-Value="Cliente.ClienteId"
+                                             class="rz-border-radius-4 shadow form-control" />
+                                <div class="input-group-append">
+                                    <div class="input-group-append">
+                                        <button type="button"
+                                                class="rz-border-radius-4 shadow form-control col-4 btn btn-primary  "
+                                        @onclick="Buscar">
+                                            Buscar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                      
+                        <div class="col-ms">
+                            <label>Nombres </label>
+                            <InputText @bind-Value="Cliente.Nombre" placeholder="Ingrese su nombre"
+                                       class="rz-border-radius-4 shadow form-control" />
+                            <ValidationMessage For="@(() => Cliente.Nombre)" />
+                        </div>
+
+                        
+                        <div class="col-ms">
+                            <label>Teléfono </label>
+                            <InputText @bind-Value="Cliente.Telefono" placeholder="Ejemplo 809-875-9684"
+                                       class="rz-border-radius-4 shadow form-control" />
+                            <ValidationMessage For="@(() => Cliente.Telefono)" />
+                        </div>
+
+                       
+                        <div class="col-ms">
+                            <label>Celular </label>
+                            <InputText @bind-Value="Cliente.Celular" placeholder="Ejemplo 809-875-9684"
+                                       class="rz-border-radius-4 shadow form-control" />
+                            <ValidationMessage For="@(() => Cliente.Celular)" />
+                        </div>
+
+                       
+                        <div class="col-ms">
+                            <label>Email </label>
+                            <InputText @bind-Value="Cliente.Email" placeholder="Nombre@gmail.com"
+                                       class="rz-border-radius-4 shadow form-control" />
+                            <ValidationMessage For="@(() => Cliente.Email)" />
+                        </div>
+
+                        
+                        <div class="col-ms">
+                            <label>Rnc </label>
+                            <InputText @bind-Value="Cliente.RNC" placeholder="RNC"
+                                       class="rz-border-radius-4 shadow form-control" />
+                            <ValidationMessage For="@(() => Cliente.RNC)" />
+                        </div>
+
+                       
+                        <div class="col-ms">
+                            <label>Dirección </label>
+                            <InputText @bind-Value="Cliente.Direccion" placeholder="Ingrese su dirección"
+                                       class="rz-border-radius-4 shadow form-control" />
+                            <ValidationMessage For="@(() => Cliente.Direccion)" />
+                        </div>                  
+                    
+                    </div>
+                </form>
+            <div class="card-footer">
+                <div class="mb-3 text-center" display: inline-block>
+                    <button type="button" class="rz-border-radius-4 shadow border border-4 btn btn-primary"
+                    @onclick="Nuevo">
+                        <i class="oi oi-document" /> Nuevo
+                    </button>
+                    <button type="submit" class="rz-border-radius-4 shadow border border-4 btn btn-success">
+                        <i class="bi bi-save-fill" /> Guardar
+                    </button>
+                    <button type="button" class="rz-border-radius-4 shadow border border-4 btn btn-danger"
+                    @onclick="Eliminar">
+                        <i class="oi oi-trash" /> Eliminar
+                    </button>
+                </div>
+            </div>
+            </div>   
+    </div>
+</EditForm>
+
+
+
+@code {
+    [Parameter]
+    public int? ClienteId { get; set;}
+    public Clientess Cliente { get; set; } = new Clientess();
+
+    protected override void OnInitialized()
+    {
+        if (ClienteId.HasValue)
+        {
+            Cliente.ClienteId = ClienteId.Value;
+            Buscar();
+        }   
+
+    }
+
+    public void Nuevo()
+    {
+        Cliente = new Clientess();
+    }
+
+    public void Guardar()
+    {
+        bool guardado =  ClientesBll.Guardar(Cliente);
+        if (guardado)
+        {
+            Nuevo();
+            notificacion.ShowNotification("Guardado correctamente.");
+        }
+        else
+        {
+            notificacion.ShowNotification("No fue guardado, intentelo de nuevo.", NotificationSeverity.Error);
+        }
+
+    }
+
+    public void Buscar()
+    {
+        if (Cliente.ClienteId > 0)
+        {
+            var encontrado =  ClientesBll.Buscar(Cliente.ClienteId);
+            if (encontrado != null)
+            {
+                this.Cliente = encontrado;
+                notificacion.ShowNotification("Registro encontrado", NotificationSeverity.Success);
+            }
+            else
+            {
+                notificacion.ShowNotification("Registro no encontrado", NotificationSeverity.Warning);
+            }
+        }
+        
+    }
+
+  
+    public void Eliminar()
+    {
+        var elimino =  ClientesBll.Eliminar(Cliente);
+        if (elimino)
+        {
+            Nuevo();
+            notificacion.ShowNotification("Eliminado correctamente.");
+        }
+        else
+        {
+            notificacion.ShowNotification("No fue eliminado. Actualize el navegador y vuelva a intentarlo.",
+            NotificationSeverity.Error);
+        }
+    }
+
+}
